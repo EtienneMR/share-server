@@ -4,9 +4,11 @@ import FileCard from "~~/components/cards/FileCard.vue";
 import UploadCard from "~~/components/cards/UploadCard.vue";
 import TheHeader from "~~/components/layout/TheHeader.vue";
 
-definePageMeta({
-  middleware: "auth",
-});
+const { loggedIn } = useUserSession();
+
+if (!loggedIn.value) {
+  await navigateTo("/api/auth/central-auth");
+}
 
 const toast = useToast();
 
