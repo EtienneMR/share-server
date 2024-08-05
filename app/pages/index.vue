@@ -57,11 +57,11 @@ watch(
 </script>
 
 <template>
-  <div class="flex-col items-stretch relative w-full flex-1 flex">
+  <section class="flex-col items-stretch relative w-full flex-1 flex">
     <TheHeader :status="status" :refresh="refresh" />
     <TransitionGroup
       name="list"
-      tag="div"
+      tag="section"
       class="px-5 files-grid"
       :class="{ 'anim-quick': shiftDown }"
     >
@@ -74,7 +74,7 @@ watch(
         :shift-down="shiftDown"
       />
     </TransitionGroup>
-  </div>
+  </section>
 </template>
 
 <style scoped>

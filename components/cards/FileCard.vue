@@ -63,18 +63,18 @@ function promptDeleteFile() {
 
 <template>
   <BaseCard>
-    <div class="px-1 h-full">
+    <section class="px-1 h-full">
       <UIcon name="mdi-file-outline" class="w-4 h-full" />
-    </div>
+    </section>
     <span class="flex-1">{{ file.pathname }}</span>
-    <div class="px-1 h-full">
+    <section class="px-1 h-full">
       <UIcon
         v-if="file.customMetadata?.public == 'true'"
         name="mdi-earth"
         class="w-4 h-full m-1"
       />
       <UIcon v-else name="mdi-lock-outline" class="w-4 h-full m-1" />
-    </div>
+    </section>
     <UButton
       icon="mdi-link-variant"
       size="2xs"
