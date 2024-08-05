@@ -29,27 +29,31 @@ const {
   refresh,
 } = await useFetch("/api/files", {});
 
-watch(error, (err) => {
-  if (err) {
-    toast.add({
-      id: "failed_files_fetch",
-      title: "Impossible de récupérer la liste des fichiers.",
-      description: err.message,
-      icon: "mdi-alert",
-      color: "red",
-      timeout: 0,
-      actions: [
-        {
-          label: "Réessayer",
-          click: () => refresh(),
-        },
-      ],
-    });
-    console.error(err);
-  } else {
-    toast.remove("failed_files_fetch");
-  }
-});
+watch(
+  error,
+  (err) => {
+    if (err) {
+      toast.add({
+        id: "failed_files_fetch",
+        title: "Impossible de récupérer la liste des fichiers.",
+        description: err.message,
+        icon: "mdi-alert",
+        color: "red",
+        timeout: 0,
+        actions: [
+          {
+            label: "Réessayer",
+            click: () => refresh(),
+          },
+        ],
+      });
+      console.error(err);
+    } else {
+      toast.remove("failed_files_fetch");
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
