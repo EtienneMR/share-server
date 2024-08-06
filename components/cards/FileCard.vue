@@ -17,7 +17,7 @@ const file = node.blob;
 
 async function deleteFile() {
   try {
-    await $fetch(`/api/files/${node.pathname}`, {
+    await $fetch(`/api/files${node.pathname}`, {
       method: "DELETE" as never,
     });
   } catch (err) {
