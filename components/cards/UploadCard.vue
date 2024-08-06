@@ -17,6 +17,9 @@ const upload = useUpload("/api/files", {
     get public() {
       return publicUpload.value;
     },
+    get path() {
+      return useRoute().path;
+    },
   },
 });
 
@@ -60,14 +63,14 @@ async function uploadFile(e: Event) {
 
 <!-- eslint-disable vue/html-self-closing -->
 <template>
-  <BaseCard>
+  <BaseCard class="rounded-t-md">
     <UIcon
       v-if="uploading"
       name="i-ph-arrows-clockwise"
-      class="w-4 h-full mr-1 animate-spin"
+      class="w-4 h-5 mr-1 animate-spin"
     />
-    <UIcon v-else-if="finished" name="mdi-check" class="w-4 h-full mr-1" />
-    <UIcon v-else name="ic-outline-cloud-upload" class="w-4 h-full mr-1" />
+    <UIcon v-else-if="finished" name="mdi-check" class="w-4 h-5 mr-1" />
+    <UIcon v-else name="ic-outline-cloud-upload" class="w-4 h-5 mr-1" />
     <input
       type="file"
       name="file"
@@ -82,6 +85,7 @@ async function uploadFile(e: Event) {
       size="2xs"
       color="gray"
       variant="ghost"
+      class="-mr-1"
       :disabled="uploading"
       @click="publicUpload = false"
     />
@@ -91,6 +95,7 @@ async function uploadFile(e: Event) {
       size="2xs"
       color="gray"
       variant="ghost"
+      class="-mr-1"
       :disabled="uploading"
       @click="publicUpload = true"
     />

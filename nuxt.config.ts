@@ -5,7 +5,13 @@ export default defineNuxtConfig({
   future: { compatibilityVersion: 4 },
 
   // https://nuxt.com/modules
-  modules: ['@nuxthub/core', '@nuxt/eslint', "@nuxt/ui", "nuxt-auth-utils"],
+  modules: [
+    '@nuxthub/core',
+    '@nuxt/eslint',
+    "@nuxt/ui",
+    "nuxt-auth-utils",
+    "@nuxtjs/tailwindcss"
+  ],
 
   // https://hub.nuxt.com/docs/getting-started/installation#options
   hub: {
