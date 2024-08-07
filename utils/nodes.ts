@@ -72,7 +72,7 @@ export function getNodeFromPath(root: TreeNode, path: string): TreeNode {
     return currentNode
 }
 
-export function formatBytes(bytes: number, decimals: number = 2) {
+export function formatBytes(bytes: number, decimals: number = 2): string {
     if (!bytes) return "0 Bytes"
 
     const base = 1000

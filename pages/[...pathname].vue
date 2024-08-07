@@ -81,7 +81,7 @@ onMounted(updateErrorToast);
       <TransitionGroup
         name="list"
         tag="div"
-        class="px-5 flex flex-col"
+        class="px-5 pb-5 flex flex-col"
         :class="{ 'anim-quick': shiftDown }"
       >
         <PathCard key="path-card" />
