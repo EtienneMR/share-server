@@ -3,13 +3,20 @@ import type { BlobObject } from "@nuxthub/core"
 export interface TreeNode {
     name: string,
     pathname: string,
+    totalSize: number,
     children?: TreeNode[]
-    blob?: BlobObject
+    blob?: BlobObject,
+    parent?: TreeNode,
+}
+
+function incrementNodeTotalSize(node: TreeNode, size: number) {
+    node.totalSize += size
+    if (node.parent) incrementNodeTotalSize(node.parent, size)
 }
 
 
 export function buildTree(blobs: BlobObject[]): TreeNode {
-    const root: TreeNode = { name: 'root', pathname: "/", children: [] }
+    const root: TreeNode = { name: 'root', pathname: "/", children: [], totalSize: 0 }
 
     blobs.forEach(blob => {
         const parts = blob.pathname.split('/')  // Split pathname into parts
@@ -26,7 +33,7 @@ export function buildTree(blobs: BlobObject[]): TreeNode {
             let nextNode = currentNode.children.find(child => child.name == part)
 
             if (!nextNode) {
-                nextNode = { name: part, pathname: currentPath.join("/") }
+                nextNode = { name: part, pathname: currentPath.join("/"), parent: currentNode, totalSize: 0 }
                 currentNode.children.push(nextNode)
             }
 
@@ -35,6 +42,7 @@ export function buildTree(blobs: BlobObject[]): TreeNode {
             // If we're at the last part, it means this is the file
             if (index === parts.length - 1) {
                 currentNode.blob = blob
+                incrementNodeTotalSize(currentNode, blob.size)
             }
         })
     })
@@ -54,7 +62,7 @@ export function getNodeFromPath(root: TreeNode, path: string): TreeNode {
         const nextNode = currentNode.children?.find(child => child.name == part)
 
         if (!nextNode) {
-            return { name: "(Vide)", pathname: "" }  // Path doesn't exist
+            return { name: "(Vide)", pathname: "", totalSize: 0 }  // Path doesn't exist
         }
         currentNode = nextNode
     }
@@ -62,4 +70,15 @@ export function getNodeFromPath(root: TreeNode, path: string): TreeNode {
     currentNode.children?.sort((a, b) => getScore(b) - getScore(a))
 
     return currentNode
+}
+
+export function formatBytes(bytes: number, decimals: number = 2) {
+    if (!bytes) return "0 Bytes"
+
+    const base = 1000
+    const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]
+
+    const i = Math.floor(Math.log(bytes) / Math.log(base))
+
+    return `${(bytes / Math.pow(base, i)).toFixed(decimals)} ${sizes[i]}`
 }

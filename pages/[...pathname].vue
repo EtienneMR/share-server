@@ -11,10 +11,12 @@ definePageMeta({
     const { loggedIn } = useUserSession();
 
     if (!loggedIn.value) {
-      await navigateTo("/api/auth/central-auth");
+      return navigateTo("/api/auth/central-auth");
     }
   },
 });
+
+const TOTAL_STORAGE_SIZE = Math.pow(10, 10);
 
 const toast = useToast();
 
@@ -56,11 +58,11 @@ const {
 
 const route = useRoute();
 const treeRoot = computed(() =>
-  files.value
-    ? buildTree(files.value as never)
-    : { name: "Error", pathname: "" }
+  files.value ? buildTree(files.value as never) : null
 );
-const currentNode = computed(() => getNodeFromPath(treeRoot.value, route.path));
+const currentNode = computed(() =>
+  treeRoot.value ? getNodeFromPath(treeRoot.value, route.path) : null
+);
 
 onMounted(() => addEventListener("keydown", keyevnt));
 onUnmounted(() => removeEventListener("keydown", keyevnt));
@@ -83,15 +85,40 @@ onMounted(updateErrorToast);
         :class="{ 'anim-quick': shiftDown }"
       >
         <PathCard key="path-card" />
+        <div v-if="currentNode && treeRoot" key="stockage-meter" class="mb-3">
+          <UMeter
+            icon="mdi-database-outline"
+            :value="currentNode.totalSize"
+            :max="TOTAL_STORAGE_SIZE"
+            label="Stockage"
+          >
+            <template #label="{ percent }">
+              <p class="text-sm">
+                {{ formatBytes(currentNode.totalSize) }} ({{
+                  Math.round(percent)
+                }}%).
+                {{
+                  Math.floor(
+                    100 - (treeRoot.totalSize / TOTAL_STORAGE_SIZE) * 100
+                  )
+                }}% restants
+              </p>
+            </template>
+          </UMeter>
+        </div>
         <UploadCard key="upload-card" :refresh="refresh" />
         <FileCard
-          v-for="node in currentNode.children"
+          v-for="node in currentNode?.children"
           :key="node.pathname"
           :node="node"
           :refresh="refresh"
           :shift-down="shiftDown"
         />
-        <BaseCard v-if="!currentNode.children?.length" class="rounded-b-md">
+        <BaseCard
+          v-show="!currentNode?.children?.length"
+          key="empty-dir"
+          class="rounded-b-md"
+        >
           Dossier vide
         </BaseCard>
       </TransitionGroup>
