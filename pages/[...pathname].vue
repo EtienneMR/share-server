@@ -11,7 +11,7 @@ definePageMeta({
     const { loggedIn } = useUserSession();
 
     if (!loggedIn.value) {
-      return navigateTo("/api/auth/central-auth");
+      return navigateTo("/api/auth/central-auth", { external: true });
     }
   },
 });

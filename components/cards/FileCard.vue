@@ -1,7 +1,18 @@
 <script setup lang="ts">
+import type { BlobObject } from "@nuxthub/core";
 import BaseCard from "~~/components/cards/BaseCard.vue";
 
 const toast = useToast();
+
+function listBlobs(currentNode: TreeNode, list: BlobObject[] = []) {
+  if (currentNode.blob) {
+    list.push(currentNode.blob);
+  }
+  for (const child of currentNode.children ?? []) {
+    listBlobs(child, list);
+  }
+  return list;
+}
 
 const props = defineProps<{
   node: TreeNode;
@@ -13,16 +24,27 @@ const { refresh } = props;
 const { shiftDown, node } = toRefs(props);
 
 const blob = computed(() => node.value.blob);
+const descendantBlobs = computed(() => listBlobs(node.value));
+const isPublic = computed(() =>
+  descendantBlobs.value.every((blob) => blob.customMetadata?.public == "true")
+);
+const isPrivate = computed(() =>
+  descendantBlobs.value.every((blob) => blob.customMetadata?.public != "true")
+);
 
-async function deleteFile() {
+async function deleteBlobs() {
   try {
-    await $fetch(`/api/files${node.value.pathname}`, {
-      method: "DELETE" as never,
-    });
+    await Promise.all(
+      descendantBlobs.value.map((blob) =>
+        $fetch(`/api/files/${blob.pathname}`, {
+          method: "DELETE" as never,
+        })
+      )
+    );
   } catch (err) {
     toast.add({
       id: `failed_delete_file-${node.value.pathname}`,
-      title: "Impossible de supprimer votre fichier.",
+      title: `Impossible de supprimer vos fichiers.`,
       description: err instanceof Error ? err.message : String(err),
       icon: "mdi-alert",
       color: "red",
@@ -30,7 +52,7 @@ async function deleteFile() {
       actions: [
         {
           label: "Réessayer",
-          click: () => deleteFile(),
+          click: () => deleteBlobs(),
         },
       ],
     });
@@ -38,11 +60,13 @@ async function deleteFile() {
   await refresh();
 }
 
-function promptDeleteFile() {
-  if (shiftDown.value) return deleteFile();
+function promptDeleteNode() {
+  if (shiftDown.value) return deleteBlobs(d);
   toast.add({
     id: `prompt_delete_file-${node.value.pathname}`,
-    title: `Supprimer ${node.value.pathname} ?`,
+    title: `Supprimer ${node.value.pathname} (${
+      descendantBlobs.value.length
+    } fichier${descendantBlobs.value.length == 1 ? "" : "s"}) ?`,
     description: "Cette suppression est définitive.",
     icon: "mdi-help",
     color: "orange",
@@ -51,7 +75,7 @@ function promptDeleteFile() {
       {
         label: "Confirmer",
         color: "red",
-        click: () => deleteFile(),
+        click: () => deleteBlobs(),
       },
       {
         label: "Annuler",
@@ -80,30 +104,44 @@ function promptDeleteFile() {
     }}</NuxtLink>
     <span v-else class="flex-1">{{ node.name }}</span>
     <span class="mx-1">{{ formatBytes(node.totalSize) }}</span>
-    <UIcon
-      v-if="blob && blob.customMetadata?.public == 'true'"
-      name="mdi-earth"
-      class="w-4 h-5 mx-1"
-    />
-    <UIcon v-else-if="blob" name="mdi-lock-outline" class="w-4 h-5 mx-1" />
+    <UIcon v-if="isPublic" name="mdi-earth" class="w-4 h-5 mx-1" />
+    <UIcon v-else-if="isPrivate" name="mdi-lock-outline" class="w-4 h-5 mx-1" />
+    <UIcon v-else name="mdi-eye-settings-outline" class="w-4 h-5 mx-1" />
     <UButton
-      v-if="blob"
+      v-if="blob && isPrivate"
+      icon="mdi-link-variant-remove"
+      size="2xs"
+      color="gray"
+      variant="ghost"
+      target="_blank"
+      external
+      :to="`/f/${blob.pathname}`"
+    />
+    <UButton
+      v-else-if="blob"
       icon="mdi-link-variant"
       size="2xs"
       color="gray"
       variant="ghost"
-      :to="`/f/${blob.pathname}`"
       target="_blank"
       external
+      :to="`/f/${blob.pathname}`"
     />
     <UButton
-      v-if="blob"
+      v-else
+      icon="mdi-link-variant-off"
+      size="2xs"
+      color="gray"
+      variant="ghost"
+      disabled
+    />
+    <UButton
       icon="mdi-trash-can-outline"
       size="2xs"
       color="gray"
       variant="ghost"
       class="-mr-1"
-      @click="promptDeleteFile"
+      @click="promptDeleteNode"
     />
   </BaseCard>
 </template>
