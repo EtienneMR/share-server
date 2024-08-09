@@ -27,6 +27,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       totalStorageSize: Math.pow(10, 10),
+      authType: "central-auth", // a matching auth-utils provider should exist in /server/api/auth/ (https://www.npmjs.com/package/nuxt-auth-utils#supported-oauth-providers)
     }
   },
 

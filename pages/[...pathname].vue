@@ -2,12 +2,16 @@
 import TheContent from "~/components/layout/TheContent.vue";
 import TheHeader from "~~/components/layout/TheHeader.vue";
 
+const runtimeConfig = useRuntimeConfig();
+
 definePageMeta({
   middleware: async () => {
     const { loggedIn } = useUserSession();
 
     if (!loggedIn.value) {
-      return navigateTo("/api/auth/central-auth", { external: true });
+      return navigateTo(`/api/auth/${runtimeConfig.public.authType}`, {
+        external: true,
+      });
     }
   },
 });
