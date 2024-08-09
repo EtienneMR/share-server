@@ -13,6 +13,7 @@ definePageMeta({
 });
 
 const toast = useToast();
+const fetchAllTree = ref(false);
 
 function updateErrorToast() {
   const err = error.value;
@@ -42,7 +43,10 @@ const {
   status,
   error,
   refresh,
-} = await useFetch("/api/files", {});
+} = await useFetch(
+  () => (fetchAllTree.value ? "/api/files/tree" : "/api/files/root"),
+  {}
+);
 
 const route = useRoute();
 const treeRoot = computed(() =>
@@ -53,7 +57,10 @@ const currentNode = computed(() =>
 );
 
 watch(error, updateErrorToast);
-onMounted(updateErrorToast);
+onNuxtReady(updateErrorToast);
+onNuxtReady(() => {
+  fetchAllTree.value = true;
+});
 </script>
 
 <template>

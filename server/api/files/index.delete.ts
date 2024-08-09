@@ -1,9 +1,9 @@
 export default eventHandler(async (event) => {
     await requireUserSession(event)
 
-    const { pathname } = getRouterParams(event)
+    const pathnames: string[] = await readBody(event)
 
-    await hubBlob().del(pathname)
+    await hubBlob().del(pathnames)
 
     return sendNoContent(event)
 })

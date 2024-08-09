@@ -1,5 +1,6 @@
 <!-- eslint-disable vue/html-self-closing -->
 <script setup lang="ts">
+import BaseCard from "~/components/cards/BaseCard.vue";
 import UploadCard from "~/components/cards/UploadCard.vue";
 
 const PRIVACY_OPTIONS: {
@@ -10,12 +11,12 @@ const PRIVACY_OPTIONS: {
   {
     label: "Privé",
     icon: "mdi-lock-outline",
-    isPublic: true,
+    isPublic: false,
   },
   {
     label: "Public",
     icon: "mdi-earth",
-    isPublic: false,
+    isPublic: true,
   },
 ];
 
@@ -107,7 +108,18 @@ async function uploadFiles(fileList: FileList) {
 
 <template>
   <div>
-    <UButton label="Open" @click="isOpen = true" />
+    <BaseCard class="rounded-t-md">
+      <UIcon name="ic-outline-cloud-upload" class="w-4 h-5 mr-1" />
+      <UButton
+        label="Uploader des fichier"
+        size="sm"
+        variant="ghost"
+        color="white"
+        class="flex-1"
+        :ui="{ padding: { sm: '' } }"
+        @click="isOpen = true"
+      />
+    </BaseCard>
 
     <USlideover v-model="isOpen">
       <div class="p-4 flex-1">
@@ -159,8 +171,8 @@ async function uploadFiles(fileList: FileList) {
           :webkitdirectory="selectedUpload.isFolder"
           @change="uploadFiles"
         />
-        <div class="pl-3 mt-3 mb-3">Fichiers en attente</div>
-        <div>
+        <div v-if="uploads.length" class="pl-3 mt-3 mb-3">Actions</div>
+        <div v-if="uploads.length">
           <UploadCard
             v-for="thisUpload in uploads"
             :key="thisUpload.id"

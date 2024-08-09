@@ -4,6 +4,11 @@ export default defineNuxtConfig({
   // https://nuxt.com/docs/getting-started/upgrade#testing-nuxt-4
   future: { compatibilityVersion: 4 },
 
+  components: [{
+    path: '~/components',
+    pathPrefix: false,
+  }],
+
   // https://nuxt.com/modules
   modules: [
     '@nuxthub/core',
@@ -21,6 +26,7 @@ export default defineNuxtConfig({
   // Env variables - https://nuxt.com/docs/getting-started/configuration#environment-variables-and-private-tokens
   runtimeConfig: {
     public: {
+      totalStorageSize: Math.pow(10, 10),
     }
   },
 

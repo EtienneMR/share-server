@@ -4,7 +4,9 @@ import NodeCard from "~/components/cards/NodeCard.vue";
 import PathCard from "~/components/cards/PathCard.vue";
 import TheUploadSlideover from "~/components/layout/TheUploadSlideover.vue";
 
-const TOTAL_STORAGE_SIZE = Math.pow(10, 10);
+const runtimeConfig = useRuntimeConfig();
+
+const totalStorageSize = runtimeConfig.public.totalStorageSize as number;
 
 defineProps<{
   treeRoot: TreeNode | null;
@@ -38,7 +40,7 @@ onUnmounted(() => removeEventListener("keyup", handleKeyEvent));
       <UMeter
         icon="mdi-database-outline"
         :value="currentNode.totalSize"
-        :max="TOTAL_STORAGE_SIZE"
+        :max="totalStorageSize"
         label="Stockage"
       >
         <template #label="data">
@@ -47,13 +49,20 @@ onUnmounted(() => removeEventListener("keyup", handleKeyEvent));
               Math.round(data.percent)
             }}%).
             {{
-              Math.floor(100 - (treeRoot.totalSize / TOTAL_STORAGE_SIZE) * 100)
+              Math.floor(100 - (treeRoot.totalSize / totalStorageSize) * 100)
             }}% restants
           </p>
         </template>
       </UMeter>
     </div>
     <TheUploadSlideover key="upload-slideover" :refresh="refresh" />
+    <BaseCard
+      v-show="currentNode && !currentNode?.children?.length"
+      key="empty-dir"
+      class="rounded-b-md"
+    >
+      Dossier vide
+    </BaseCard>
     <NodeCard
       v-for="node in currentNode?.children"
       :key="node.pathname"
@@ -61,12 +70,5 @@ onUnmounted(() => removeEventListener("keyup", handleKeyEvent));
       :refresh="refresh"
       :shift-down="shiftDown"
     />
-    <BaseCard
-      v-show="!currentNode?.children?.length"
-      key="empty-dir"
-      class="rounded-b-md"
-    >
-      Dossier vide
-    </BaseCard>
   </TransitionGroup>
 </template>
