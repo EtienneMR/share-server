@@ -14,7 +14,5 @@ export default eventHandler(async (event) => {
         })) ?? [])
     ]
 
-    console.log(result)
-
     return result
 })
