@@ -1,9 +1,5 @@
-<!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import BaseCard from "~/components/cards/BaseCard.vue";
-import PathCard from "~/components/cards/PathCard.vue";
-import FileCard from "~~/components/cards/FileCard.vue";
-import UploadCard from "~~/components/cards/UploadCard.vue";
+import TheContent from "~/components/layout/TheContent.vue";
 import TheHeader from "~~/components/layout/TheHeader.vue";
 
 definePageMeta({
@@ -16,15 +12,7 @@ definePageMeta({
   },
 });
 
-const TOTAL_STORAGE_SIZE = Math.pow(10, 10);
-
 const toast = useToast();
-
-const shiftDown = ref(false);
-
-function keyevnt(ev: KeyboardEvent) {
-  shiftDown.value = ev.shiftKey;
-}
 
 function updateErrorToast() {
   const err = error.value;
@@ -50,7 +38,7 @@ function updateErrorToast() {
 }
 
 const {
-  data: files,
+  data: blobs,
   status,
   error,
   refresh,
@@ -58,17 +46,11 @@ const {
 
 const route = useRoute();
 const treeRoot = computed(() =>
-  files.value ? buildTree(files.value as never) : null
+  blobs.value ? buildTree(blobs.value as never) : null
 );
 const currentNode = computed(() =>
   treeRoot.value ? getNodeFromPath(treeRoot.value, route.path) : null
 );
-
-onMounted(() => addEventListener("keydown", keyevnt));
-onUnmounted(() => removeEventListener("keydown", keyevnt));
-
-onMounted(() => addEventListener("keyup", keyevnt));
-onUnmounted(() => removeEventListener("keyup", keyevnt));
 
 watch(error, updateErrorToast);
 onMounted(updateErrorToast);
@@ -78,50 +60,11 @@ onMounted(updateErrorToast);
   <div>
     <div class="flex-col items-stretch relative w-full flex-1 flex">
       <TheHeader :status="status" :refresh="refresh" />
-      <TransitionGroup
-        name="list"
-        tag="div"
-        class="px-5 pb-5 flex flex-col"
-        :class="{ 'anim-quick': shiftDown }"
-      >
-        <PathCard key="path-card" />
-        <div v-if="currentNode && treeRoot" key="stockage-meter" class="mb-3">
-          <UMeter
-            icon="mdi-database-outline"
-            :value="currentNode.totalSize"
-            :max="TOTAL_STORAGE_SIZE"
-            label="Stockage"
-          >
-            <template #label="{ percent }">
-              <p class="text-sm">
-                {{ formatBytes(currentNode.totalSize) }} ({{
-                  Math.round(percent)
-                }}%).
-                {{
-                  Math.floor(
-                    100 - (treeRoot.totalSize / TOTAL_STORAGE_SIZE) * 100
-                  )
-                }}% restants
-              </p>
-            </template>
-          </UMeter>
-        </div>
-        <UploadCard key="upload-card" :refresh="refresh" />
-        <FileCard
-          v-for="node in currentNode?.children"
-          :key="node.pathname"
-          :node="node"
-          :refresh="refresh"
-          :shift-down="shiftDown"
-        />
-        <BaseCard
-          v-show="!currentNode?.children?.length"
-          key="empty-dir"
-          class="rounded-b-md"
-        >
-          Dossier vide
-        </BaseCard>
-      </TransitionGroup>
+      <TheContent
+        :tree-root="treeRoot"
+        :current-node="currentNode"
+        :refresh="refresh"
+      />
     </div>
 
     <UNotifications />

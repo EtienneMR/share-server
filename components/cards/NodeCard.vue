@@ -4,6 +4,8 @@ import BaseCard from "~~/components/cards/BaseCard.vue";
 
 const toast = useToast();
 
+const formatBytes2 = formatBytes;
+
 function listBlobs(currentNode: TreeNode, list: BlobObject[] = []) {
   if (currentNode.blob) {
     list.push(currentNode.blob);
@@ -61,7 +63,7 @@ async function deleteBlobs() {
 }
 
 function promptDeleteNode() {
-  if (shiftDown.value) return deleteBlobs(d);
+  if (shiftDown.value) return deleteBlobs();
   toast.add({
     id: `prompt_delete_file-${node.value.pathname}`,
     title: `Supprimer ${node.value.pathname} (${
@@ -99,11 +101,14 @@ function promptDeleteNode() {
       class="w-4 h-5 mr-1"
     />
     <UIcon v-else name="mdi-file-outline" class="w-4 h-5 mr-1" />
-    <NuxtLink v-if="node.children" :to="node.pathname" class="flex-1">{{
-      node.name
-    }}</NuxtLink>
-    <span v-else class="flex-1">{{ node.name }}</span>
-    <span class="mx-1">{{ formatBytes(node.totalSize) }}</span>
+    <NuxtLink
+      v-if="node.children"
+      :to="node.pathname"
+      class="flex-1 w-0 truncate"
+      >{{ node.name }}</NuxtLink
+    >
+    <span v-else class="flex-1 w-0 truncate">{{ node.name }}</span>
+    <span class="mx-1">{{ formatBytes2(node.totalSize) }}</span>
     <UIcon v-if="isPublic" name="mdi-earth" class="w-4 h-5 mx-1" />
     <UIcon v-else-if="isPrivate" name="mdi-lock-outline" class="w-4 h-5 mx-1" />
     <UIcon v-else name="mdi-eye-settings-outline" class="w-4 h-5 mx-1" />
