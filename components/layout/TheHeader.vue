@@ -8,18 +8,11 @@ const props = defineProps<{
 
 const { status, refresh } = toRefs(props);
 
-const finished = ref(false);
-let timeoutId: NodeJS.Timeout;
-
-function removeFinished() {
-  finished.value = false;
-}
+const { state: finished, use: setFinished } = useTimed(3000);
 
 watch(status, (st) => {
   if (st == "success") {
-    clearTimeout(timeoutId);
-    finished.value = true;
-    timeoutId = setTimeout(removeFinished, 3000);
+    setFinished();
   }
 });
 </script>

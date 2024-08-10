@@ -3,6 +3,25 @@ import TheContent from "~/components/layout/TheContent.vue";
 import TheHeader from "~~/components/layout/TheHeader.vue";
 
 const runtimeConfig = useRuntimeConfig();
+const route = useRoute();
+const toast = useToast();
+
+useSeoMeta({
+  title: () => `Share server — ${route.path}`,
+});
+
+useHead({
+  htmlAttrs: {
+    lang: "en",
+  },
+  link: [
+    {
+      rel: "icon",
+      type: "image/png",
+      href: "/favicon.png",
+    },
+  ],
+});
 
 definePageMeta({
   middleware: async () => {
@@ -16,7 +35,6 @@ definePageMeta({
   },
 });
 
-const toast = useToast();
 const fetchAllTree = ref(false);
 
 function updateErrorToast() {
@@ -52,7 +70,6 @@ const {
   {}
 );
 
-const route = useRoute();
 const treeRoot = computed(() =>
   blobs.value ? buildTree(blobs.value as never) : null
 );
@@ -81,36 +98,3 @@ onNuxtReady(() => {
     <UNotifications />
   </div>
 </template>
-
-<style scoped>
-.files-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100vw, 400px), 1fr));
-  grid-gap: 1em;
-  justify-items: stretch;
-  width: 100%;
-}
-
-.list-move, /* apply transition to moving elements */
-.list-enter-active,
-.list-leave-active {
-  transition: opacity var(--transition-speed, 0.5s) ease,
-    transform var(--transition-speed, 0.5s) ease;
-}
-
-.list-enter-from,
-.list-leave-to {
-  opacity: 0;
-  transform: translateX(30px);
-}
-
-/* ensure leaving items are taken out of layout flow so that moving
-   animations can be calculated correctly. */
-.list-leave-active {
-  @apply -mb-9;
-}
-
-.anim-quick {
-  --transition-speed: 0.1s;
-}
-</style>

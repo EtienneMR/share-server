@@ -60,30 +60,40 @@ const uploads: Ref<
   {
     files: File[];
     isPublic: boolean;
-    state: Ref<"done" | "uploading" | "failed">;
+    state: "done" | "uploading" | "failed";
     id: number;
   }[]
 > = ref([]);
 
+const firstUploading = computed(() =>
+  uploads.value.find((upload) => upload.state == "uploading")
+);
+
+function onBeforeUnload(event: BeforeUnloadEvent) {
+  if (firstUploading.value) {
+    event.preventDefault();
+  }
+}
+
 async function uploadFiles(fileList: FileList) {
   if (fileList.length) {
-    const state: Ref<"done" | "uploading" | "failed"> = ref("uploading");
-    const thisUpload = {
+    const thisUpload = reactive({
       files: Array.from(fileList),
       isPublic: selectedPrivacy.value?.isPublic ?? false,
       path: useRoute().path,
       id: new Date().getTime(),
-      state,
-    };
-    uploads.value.unshift(thisUpload);
+      state: "uploading" as "done" | "uploading" | "failed",
+    });
+
+    uploads.value = [thisUpload, ...uploads.value]; // unshift don't force recomputation of someUploading
 
     try {
       nextUploadIsPublic = thisUpload.isPublic;
       nextUploadPath = thisUpload.path;
       await upload(thisUpload.files);
-      state.value = "done";
+      thisUpload.state = "done";
     } catch (err) {
-      state.value = "failed";
+      thisUpload.state = "failed";
 
       toast.add({
         id: "failed_file_upload",
@@ -104,21 +114,33 @@ async function uploadFiles(fileList: FileList) {
     await refresh();
   }
 }
+
+if (!import.meta.dev) {
+  onMounted(() => addEventListener("beforeunload", onBeforeUnload));
+  onUnmounted(() => removeEventListener("beforeunload", onBeforeUnload));
+}
 </script>
 
 <template>
   <div>
     <BaseCard class="rounded-t-md">
-      <UIcon name="ic-outline-cloud-upload" class="w-4 h-5 mr-1" />
+      <UIcon
+        v-if="firstUploading"
+        name="i-ph-arrows-clockwise"
+        class="w-4 h-5 mr-1 animate-spin"
+      />
+      <UIcon v-else name="mdi-cloud-upload-outline" class="w-4 h-5 mr-1" />
       <UButton
         label="Uploader des fichier"
         size="sm"
         variant="ghost"
         color="white"
-        class="flex-1"
-        :ui="{ padding: { sm: '' } }"
+        class="p-0 mr-3"
         @click="isOpen = true"
       />
+      <span class="flex-1 truncate">{{
+        firstUploading?.files.map((file) => file.name).join(", ")
+      }}</span>
     </BaseCard>
 
     <USlideover v-model="isOpen">
@@ -127,7 +149,7 @@ async function uploadFiles(fileList: FileList) {
           color="gray"
           variant="ghost"
           size="sm"
-          icon="i-heroicons-x-mark-20-solid"
+          icon="mdi-close"
           class="flex sm:hidden absolute end-5 top-5 z-10"
           square
           padded

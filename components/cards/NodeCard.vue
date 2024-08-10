@@ -140,9 +140,9 @@ function promptDeleteNode() {
     <UButton
       icon="mdi-trash-can-outline"
       size="2xs"
-      color="gray"
       variant="ghost"
       class="-mr-1"
+      :color="shiftDown ? 'red' : 'gray'"
       @click="promptDeleteNode"
     />
   </BaseCard>

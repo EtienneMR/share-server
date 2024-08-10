@@ -26,14 +26,14 @@ const links = computed(() => {
     previous += "/" + name;
     return {
       label: name,
-      icon: "",
+      icon: "mdi-folder-outline",
       to: previous,
     };
   });
 
   l.unshift({
     label: l.length ? "" : "Root",
-    icon: "i-heroicons-home",
+    icon: "mdi-folder-home-outline",
     to: "/",
   });
 
