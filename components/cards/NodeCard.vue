@@ -36,10 +36,30 @@ const isPrivate = computed(() =>
 
 async function deleteBlobs() {
   try {
-    await $fetch("/api/files", {
-      method: "DELETE",
-      body: descendantBlobs.value.map((blob) => blob.pathname),
-    });
+    const path = node.value.pathname.substring(1);
+    let buffer = "";
+
+    const dispatch = () =>
+      $fetch("/api/files", {
+        method: "DELETE",
+        query: {
+          path,
+          files: buffer,
+        },
+      });
+
+    for (const descendant of descendantBlobs.value) {
+      const name = descendant.pathname.substring(path.length);
+      if (buffer.length == 0) {
+        buffer = name;
+      } else if (buffer.length + name.length < 1500) {
+        buffer += ";" + name;
+      } else {
+        await dispatch();
+        buffer = name;
+      }
+    }
+    await dispatch();
   } catch (err) {
     toast.add({
       id: `failed_delete_file-${node.value.pathname}`,

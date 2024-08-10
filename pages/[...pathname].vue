@@ -2,7 +2,6 @@
 import TheContent from "~/components/layout/TheContent.vue";
 import TheHeader from "~~/components/layout/TheHeader.vue";
 
-const runtimeConfig = useRuntimeConfig();
 const route = useRoute();
 const toast = useToast();
 
@@ -28,6 +27,7 @@ definePageMeta({
     const { loggedIn } = useUserSession();
 
     if (!loggedIn.value) {
+      const runtimeConfig = useRuntimeConfig();
       return navigateTo(`/api/auth/${runtimeConfig.public.authType}`, {
         external: true,
       });

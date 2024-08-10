@@ -1,14 +1,12 @@
 export default eventHandler(async (event) => {
     await requireUserSession(event)
 
-    const pathnames = await readValidatedBody(event, (data) => Array.isArray(data) && data.every(path => typeof path == "string")) as unknown as string[]
+    // workaround to prevent cloudflare "The script will never generate a response." error.
+    const { path, files } = getQuery(event) as { path: string, files: string }
 
-    try {
-        await hubBlob().del(pathnames)
-    } catch (error) {
-        console.error(error)
-        await Promise.all(pathnames.map(pathname => hubBlob().del(pathname)))
-    }
+    console.log(files.split(";").map(file => path + file))
+
+    await hubBlob().del(files.split(";").map(file => path + file))
 
     return sendNoContent(event)
 })
