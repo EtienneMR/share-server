@@ -1,11 +1,12 @@
 export default eventHandler(async (event) => {
     await requireUserSession(event)
 
-    // @ts-expect-error - req.body is not defined in the type definitions
     // workaround to prevent cloudflare "The script will never generate a response." error.
-    const pathnames: string = event.node.req.body ?? await readRawBody(event)
+    const { path, files } = getQuery(event) as { path: string, files: string }
 
-    await hubBlob().del(JSON.parse(pathnames))
+    console.log(files.split(";").map(file => path + file))
+
+    await hubBlob().del(files.split(";").map(file => path + file))
 
     return sendNoContent(event)
 })
