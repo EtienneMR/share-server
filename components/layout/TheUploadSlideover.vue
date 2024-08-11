@@ -201,7 +201,6 @@ if (!import.meta.dev) {
             :files="thisUpload.files"
             :is-public="thisUpload.isPublic"
             :state="(thisUpload.state as never)"
-            :refresh="emit('refresh')"
           />
         </div>
       </div>
