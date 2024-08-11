@@ -1,12 +1,24 @@
+import type { BlobObject } from "@nuxthub/core"
+
 export default eventHandler(async (event) => {
     await requireUserSession(event)
 
-    // workaround to prevent cloudflare "The script will never generate a response." error.
-    const { path, files } = getQuery(event) as { path: string, files: string }
+    const hub = hubBlob()
 
-    console.log(files.split(";").map(file => path + file))
+    const { path } = getQuery(event) as { path: string }
 
-    await hubBlob().del(files.split(";").map(file => path + file))
+    const allBlobs: BlobObject[] = []
+    let continieFetch = true
+    let nextCursor = undefined
+
+    while (continieFetch) {
+        const { blobs, hasMore, cursor } = await hubBlob().list({ prefix: path + "/", cursor: nextCursor })
+        allBlobs.push(...blobs)
+        continieFetch = hasMore
+        nextCursor = cursor
+    }
+
+    await hub.del([path, ...allBlobs.map(blob => blob.pathname)])
 
     return sendNoContent(event)
 })

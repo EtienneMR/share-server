@@ -37,6 +37,11 @@ definePageMeta({
 
 const fetchAllTree = ref(false);
 
+function pathWithoutRootSlash() {
+  const { path } = route;
+  return encodeURI(path == "/" ? "%root%" : path.substring(1));
+}
+
 function updateErrorToast() {
   const err = error.value;
   if (err) {
@@ -66,7 +71,10 @@ const {
   error,
   refresh,
 } = await useFetch(
-  () => (fetchAllTree.value ? "/api/files/tree" : "/api/files/root"),
+  () =>
+    fetchAllTree.value
+      ? "/api/files/tree"
+      : `/api/files/folded/${pathWithoutRootSlash()}`,
   {}
 );
 
@@ -80,18 +88,23 @@ const currentNode = computed(() =>
 watch(error, updateErrorToast);
 onNuxtReady(updateErrorToast);
 onNuxtReady(() => {
-  fetchAllTree.value = true;
+  //fetchAllTree.value = true;
 });
 </script>
 
 <template>
   <div>
     <div class="flex-col items-stretch relative w-full flex-1 flex">
-      <TheHeader :status="status" :refresh="refresh" />
+      <TheHeader
+        v-model:fetch-all-tree="fetchAllTree"
+        :status="status"
+        @refresh="refresh"
+      />
       <TheContent
+        v-model:fetch-all-tree="fetchAllTree"
         :tree-root="treeRoot"
         :current-node="currentNode"
-        :refresh="refresh"
+        @refresh="refresh"
       />
     </div>
 

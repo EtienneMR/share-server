@@ -8,10 +8,15 @@ const runtimeConfig = useRuntimeConfig();
 
 const totalStorageSize = runtimeConfig.public.totalStorageSize as number;
 
-defineProps<{
+const fetchAllTree = defineModel<boolean>("fetchAllTree");
+
+const emit = defineEmits<{
+  refresh: [];
+}>();
+
+const props = defineProps<{
   treeRoot: TreeNode | null;
   currentNode: TreeNode | null;
-  refresh: () => Promise<void>;
 }>();
 
 const formatBytes2 = formatBytes;
@@ -20,6 +25,10 @@ const shiftDown = ref(false);
 function handleKeyEvent(ev: KeyboardEvent) {
   shiftDown.value = ev.shiftKey;
 }
+
+const realChildren = computed(() =>
+  props.currentNode?.children?.filter((child) => child.name)
+);
 
 onMounted(() => addEventListener("keydown", handleKeyEvent));
 onUnmounted(() => removeEventListener("keydown", handleKeyEvent));
@@ -36,7 +45,11 @@ onUnmounted(() => removeEventListener("keyup", handleKeyEvent));
     :class="{ 'anim-quick': shiftDown }"
   >
     <PathCard key="path-card" />
-    <div v-if="currentNode && treeRoot" key="stockage-meter" class="mb-3">
+    <div
+      v-if="fetchAllTree && currentNode && treeRoot"
+      key="stockage-meter"
+      class="mb-3"
+    >
       <UMeter
         icon="mdi-database-outline"
         :value="currentNode.totalSize"
@@ -55,7 +68,7 @@ onUnmounted(() => removeEventListener("keyup", handleKeyEvent));
         </template>
       </UMeter>
     </div>
-    <TheUploadSlideover key="upload-slideover" :refresh="refresh" />
+    <TheUploadSlideover key="upload-slideover" @refresh="emit('refresh')" />
     <BaseCard
       v-show="currentNode && !currentNode?.children?.length"
       key="empty-dir"
@@ -64,11 +77,12 @@ onUnmounted(() => removeEventListener("keyup", handleKeyEvent));
       Dossier vide
     </BaseCard>
     <NodeCard
-      v-for="node in currentNode?.children"
+      v-for="node in realChildren"
       :key="node.pathname"
+      v-model:fetch-all-tree="fetchAllTree"
       :node="node"
-      :refresh="refresh"
       :shift-down="shiftDown"
+      @refresh="emit('refresh')"
     />
   </TransitionGroup>
 </template>

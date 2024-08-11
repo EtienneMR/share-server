@@ -1,14 +1,37 @@
 <script setup lang="ts">
 import type { AsyncDataRequestStatus } from "#app";
 
-const props = defineProps<{
-  status: AsyncDataRequestStatus;
-  refresh: () => Promise<void>;
+const FETCH_OPTIONS = [
+  {
+    label: "Dossier",
+    icon: "mdi-folder-minus-outline",
+    fetchAllTree: false,
+  },
+  {
+    label: "Entier",
+    icon: "mdi-file-tree-outline",
+    fetchAllTree: true,
+  },
+];
+
+const fetchAllTree = defineModel<boolean>("fetchAllTree");
+
+const emit = defineEmits<{
+  refresh: [];
 }>();
 
-const { status, refresh } = toRefs(props);
+const props = defineProps<{
+  status: AsyncDataRequestStatus;
+}>();
+
+const { status } = toRefs(props);
 
 const { state: finished, use: setFinished } = useTimed(3000);
+const selectedLoad = computed({
+  get: () =>
+    FETCH_OPTIONS.find((option) => option.fetchAllTree == fetchAllTree.value),
+  set: (option) => (fetchAllTree.value = option?.fetchAllTree),
+});
 
 watch(status, (st) => {
   if (st == "success") {
@@ -28,7 +51,7 @@ watch(status, (st) => {
       color="gray"
       variant="ghost"
       :loading="status == 'pending'"
-      @click="refresh"
+      @click="emit('refresh')"
     />
     <UButton
       v-else
@@ -36,7 +59,18 @@ watch(status, (st) => {
       color="gray"
       variant="ghost"
       :loading="status == 'pending'"
-      @click="refresh"
+      @click="emit('refresh')"
     />
+    <div class="flex-1" />
+    <span>Charger</span>
+    <USelectMenu v-model="selectedLoad" :options="FETCH_OPTIONS">
+      <template #leading>
+        <UIcon
+          v-if="selectedLoad"
+          :name="(selectedLoad.icon as string)"
+          class="w-5 h-5"
+        />
+      </template>
+    </USelectMenu>
   </h1>
 </template>

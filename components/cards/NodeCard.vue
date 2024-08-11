@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import type { BlobObject } from "@nuxthub/core";
+import type { PartialBlobObject } from "~/utils/nodes.js";
 import BaseCard from "~~/components/cards/BaseCard.vue";
 
 const toast = useToast();
 
 const formatBytes2 = formatBytes;
 
-function listBlobs(currentNode: TreeNode, list: BlobObject[] = []) {
+function listBlobs(currentNode: TreeNode, list: PartialBlobObject[] = []) {
   if (currentNode.blob) {
     list.push(currentNode.blob);
   }
@@ -16,17 +16,25 @@ function listBlobs(currentNode: TreeNode, list: BlobObject[] = []) {
   return list;
 }
 
+const fetchAllTree = defineModel<boolean>("fetchAllTree");
+
+const emit = defineEmits<{
+  refresh: [];
+}>();
+
 const props = defineProps<{
   node: TreeNode;
   shiftDown: boolean;
-  refresh: () => Promise<void>;
 }>();
 
-const { refresh } = props;
 const { shiftDown, node } = toRefs(props);
+const deleting = ref(false);
 
 const blob = computed(() => node.value.blob);
 const descendantBlobs = computed(() => listBlobs(node.value));
+const hasAnyUnloadedDescendant = computed(() =>
+  descendantBlobs.value.some((blob) => blob.pathname.endsWith("/"))
+);
 const isPublic = computed(() =>
   descendantBlobs.value.every((blob) => blob.customMetadata?.public == "true")
 );
@@ -35,32 +43,18 @@ const isPrivate = computed(() =>
 );
 
 async function deleteBlobs() {
+  deleting.value = true;
   try {
     const path = node.value.pathname.substring(1);
-    let buffer = "";
 
-    const dispatch = () =>
-      $fetch("/api/files", {
-        method: "DELETE",
-        query: {
-          path,
-          files: buffer,
-        },
-      });
-
-    for (const descendant of descendantBlobs.value) {
-      const name = descendant.pathname.substring(path.length);
-      if (buffer.length == 0) {
-        buffer = name;
-      } else if (buffer.length + name.length < 1500) {
-        buffer += ";" + name;
-      } else {
-        await dispatch();
-        buffer = name;
-      }
-    }
-    await dispatch();
+    await $fetch("/api/files", {
+      method: "DELETE",
+      query: {
+        path,
+      },
+    });
   } catch (err) {
+    deleting.value = false;
     toast.add({
       id: `failed_delete_file-${node.value.pathname}`,
       title: `Impossible de supprimer vos fichiers.`,
@@ -76,7 +70,7 @@ async function deleteBlobs() {
       ],
     });
   }
-  await refresh();
+  emit("refresh");
 }
 
 function promptDeleteNode() {
@@ -84,8 +78,14 @@ function promptDeleteNode() {
   toast.add({
     id: `prompt_delete_file-${node.value.pathname}`,
     title: `Supprimer ${node.value.pathname} (${
-      descendantBlobs.value.length
-    } fichier${descendantBlobs.value.length == 1 ? "" : "s"}) ?`,
+      hasAnyUnloadedDescendant.value
+        ? "beaucoup de"
+        : descendantBlobs.value.length
+    } fichier${
+      descendantBlobs.value.length == 1 && !hasAnyUnloadedDescendant.value
+        ? ""
+        : "s"
+    }) ?`,
     description: "Cette suppression est définitive.",
     icon: "mdi-help",
     color: "orange",
@@ -125,37 +125,54 @@ function promptDeleteNode() {
       >{{ node.name }}</NuxtLink
     >
     <span v-else class="flex-1 w-0 truncate">{{ node.name }}</span>
-    <span class="mx-1">{{ formatBytes2(node.totalSize) }}</span>
-    <UIcon v-if="isPublic" name="mdi-earth" class="w-4 h-5 mx-1" />
-    <UIcon v-else-if="isPrivate" name="mdi-lock-outline" class="w-4 h-5 mx-1" />
-    <UIcon v-else name="mdi-eye-settings-outline" class="w-4 h-5 mx-1" />
+    <template v-if="!hasAnyUnloadedDescendant">
+      <span class="mx-1">{{ formatBytes2(node.totalSize) }}</span>
+      <UIcon v-if="isPublic" name="mdi-earth" class="w-4 h-5 mx-1" />
+      <UIcon
+        v-else-if="isPrivate"
+        name="mdi-lock-outline"
+        class="w-4 h-5 mx-1"
+      />
+      <UIcon v-else name="mdi-eye-settings-outline" class="w-4 h-5 mx-1" />
+      <UButton
+        v-if="blob && isPrivate"
+        icon="mdi-link-variant-remove"
+        size="2xs"
+        color="gray"
+        variant="ghost"
+        target="_blank"
+        external
+        :to="`/f/${blob.pathname}`"
+        :disabled="deleting"
+      />
+      <UButton
+        v-else-if="blob"
+        icon="mdi-link-variant"
+        size="2xs"
+        color="gray"
+        variant="ghost"
+        target="_blank"
+        external
+        :to="`/f/${blob.pathname}`"
+        :disabled="deleting"
+      />
+      <UButton
+        v-else
+        icon="mdi-link-variant-off"
+        size="2xs"
+        color="gray"
+        variant="ghost"
+        disabled
+      />
+    </template>
     <UButton
-      v-if="blob && isPrivate"
-      icon="mdi-link-variant-remove"
+      v-else-if="!fetchAllTree"
+      icon="mdi-dots-vertical"
       size="2xs"
       color="gray"
       variant="ghost"
-      target="_blank"
-      external
-      :to="`/f/${blob.pathname}`"
-    />
-    <UButton
-      v-else-if="blob"
-      icon="mdi-link-variant"
-      size="2xs"
-      color="gray"
-      variant="ghost"
-      target="_blank"
-      external
-      :to="`/f/${blob.pathname}`"
-    />
-    <UButton
-      v-else
-      icon="mdi-link-variant-off"
-      size="2xs"
-      color="gray"
-      variant="ghost"
-      disabled
+      class="-mr-1"
+      @click="fetchAllTree = true"
     />
     <UButton
       icon="mdi-trash-can-outline"
@@ -163,6 +180,7 @@ function promptDeleteNode() {
       variant="ghost"
       class="-mr-1"
       :color="shiftDown ? 'red' : 'gray'"
+      :loading="deleting"
       @click="promptDeleteNode"
     />
   </BaseCard>

@@ -33,8 +33,8 @@ const UPLOAD_OPTIONS = [
   },
 ];
 
-const { refresh } = defineProps<{
-  refresh: () => Promise<void>;
+const emit = defineEmits<{
+  refresh: [];
 }>();
 
 let nextUploadIsPublic = false;
@@ -111,7 +111,7 @@ async function uploadFiles(fileList: FileList) {
       });
     }
 
-    await refresh();
+    emit("refresh");
   }
 }
 
@@ -201,7 +201,7 @@ if (!import.meta.dev) {
             :files="thisUpload.files"
             :is-public="thisUpload.isPublic"
             :state="(thisUpload.state as never)"
-            :refresh="refresh"
+            :refresh="emit('refresh')"
           />
         </div>
       </div>
