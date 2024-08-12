@@ -17,6 +17,7 @@ const emit = defineEmits<{
 const props = defineProps<{
   treeRoot: TreeNode | null;
   currentNode: TreeNode | null;
+  blobs: PartialBlobObject[] | undefined;
 }>();
 
 const formatBytes2 = formatBytes;
@@ -44,7 +45,11 @@ onUnmounted(() => removeEventListener("keyup", handleKeyEvent));
     class="px-5 pb-5 flex flex-col"
     :class="{ 'anim-quick': shiftDown }"
   >
-    <PathCard key="path-card" />
+    <PathCard
+      key="path-card"
+      v-model:fetch-all-tree="fetchAllTree"
+      :blobs="blobs"
+    />
     <div
       v-if="fetchAllTree && currentNode && treeRoot"
       key="stockage-meter"

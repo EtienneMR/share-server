@@ -104,6 +104,7 @@ onNuxtReady(() => {
         v-model:fetch-all-tree="fetchAllTree"
         :tree-root="treeRoot"
         :current-node="currentNode"
+        :blobs="(blobs as never)"
         @refresh="refresh"
       />
     </div>

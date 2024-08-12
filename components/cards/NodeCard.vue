@@ -171,7 +171,6 @@ function promptDeleteNode() {
       size="2xs"
       color="gray"
       variant="ghost"
-      class="-mr-1"
       @click="fetchAllTree = true"
     />
     <UButton

@@ -4,6 +4,12 @@ import BaseCard from "~/components/cards/BaseCard.vue";
 const route = useRoute();
 const router = useRouter();
 
+const fetchAllTree = defineModel<boolean>("fetchAllTree");
+
+defineProps<{
+  blobs: PartialBlobObject[] | undefined;
+}>();
+
 const folderTarget = ref("");
 
 function go() {
@@ -54,5 +60,7 @@ const links = computed(() => {
         @blur="go"
       />
     </form>
+    <span class="flex-1" />
+    <TheSearch v-model:fetch-all-tree="fetchAllTree" :blobs="blobs" />
   </BaseCard>
 </template>

@@ -1,14 +1,11 @@
 <script setup lang="ts">
 import BaseCard from "~~/components/cards/BaseCard.vue";
 
-const props = defineProps<{
+defineProps<{
   files: File[];
   isPublic: boolean;
   state: "done" | "uploading" | "failed";
 }>();
-
-const { files, isPublic } = props;
-const state = toRef(props, "state");
 </script>
 
 <!-- eslint-disable vue/html-self-closing -->
