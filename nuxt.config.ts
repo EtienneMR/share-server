@@ -15,7 +15,8 @@ export default defineNuxtConfig({
     '@nuxt/eslint',
     "@nuxt/ui",
     "nuxt-auth-utils",
-    "@nuxtjs/tailwindcss"
+    "@nuxtjs/tailwindcss",
+    "nuxt-authorization"
   ],
 
   // https://hub.nuxt.com/docs/getting-started/installation#options
@@ -27,7 +28,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       totalStorageSize: Math.pow(10, 10),
-      authType: "central-auth", // a matching auth-utils provider should exist in /server/api/auth/ (https://www.npmjs.com/package/nuxt-auth-utils#supported-oauth-providers)
+      authType: "auth0", // a matching auth-utils provider should exist in /server/api/auth/ (https://www.npmjs.com/package/nuxt-auth-utils#supported-oauth-providers)
     }
   },
 

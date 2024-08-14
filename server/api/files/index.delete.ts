@@ -1,11 +1,12 @@
 import type { BlobObject } from "@nuxthub/core"
+import { writePath } from "~/utils/abilities"
 
 export default eventHandler(async (event) => {
-    await requireUserSession(event)
+    const { path } = getQuery(event) as { path: string }
+
+    await authorize(event, writePath, path)
 
     const hub = hubBlob()
-
-    const { path } = getQuery(event) as { path: string }
 
     const allBlobs: BlobObject[] = []
     let continieFetch = true

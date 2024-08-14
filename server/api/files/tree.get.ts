@@ -1,7 +1,8 @@
 import type { BlobObject } from "@nuxthub/core"
+import { readGlobal } from "~/utils/abilities"
 
 export default eventHandler(async (event) => {
-    await requireUserSession(event)
+    await authorize(event, readGlobal)
 
     const allBlobs: BlobObject[] = []
     let continieFetch = true

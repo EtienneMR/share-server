@@ -50,7 +50,7 @@ export function buildTree(blobs: PartialBlobObject[]): TreeNode {
 }
 
 function getScore(node: TreeNode) {
-    return (node.children ? 2 : 0) + (node.blob ? 1 : 0)
+    return (node.children?.length ? 2 : 0) + (node.blob ? 1 : 0)
 }
 
 export function getNodeFromPath(root: TreeNode, path: string): TreeNode {
@@ -64,8 +64,7 @@ export function getNodeFromPath(root: TreeNode, path: string): TreeNode {
             currentNode = nextNode
         } else {
             const createdNode = { name: part, pathname: currentNode.pathname + "/" + part, parent: currentNode, totalSize: 0 }
-            if (currentNode.children) currentNode.children.push(createdNode)
-            else currentNode.children = [createdNode]
+            return createdNode
         }
     }
 

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { RouteLocationNormalized } from "vue-router";
 import TheContent from "~/components/layout/TheContent.vue";
 import TheHeader from "~~/components/layout/TheHeader.vue";
 
@@ -34,6 +35,60 @@ definePageMeta({
     }
   },
 });
+
+async function checkRoute(to: RouteLocationNormalized) {
+  if (await denies(readPath, to.path)) {
+    const { user } = useUserSession();
+    const username = user.value?.name;
+    if (await allows(readOwn)) {
+      if (route.path == "/" || route.path == `/${username}`) {
+        return `/${username}/`;
+      } else if (!to.path.startsWith(`/${username}/`)) {
+        toast.add({
+          id: "err_access",
+          title: "Accès impossible",
+          description:
+            "Vous avez essayé d'accéder a un dossier auquel vous n'avez pas accès",
+          icon: "mdi-alert",
+          color: "red",
+        });
+        return false;
+      }
+    } else {
+      toast.add({
+        id: "err_access",
+        title: "Accès impossible",
+        description:
+          "Vous avez essayé d'accéder a un dossier auquel vous n'avez pas accès",
+        icon: "mdi-alert",
+        color: "red",
+      });
+      return false;
+    }
+  }
+}
+
+onBeforeRouteUpdate(checkRoute);
+if (await denies(readPath, route.path)) {
+  const { user } = useUserSession();
+  const username = user.value?.name;
+  if (await allows(readOwn)) {
+    if (route.path == "/" || route.path == `/${username}`) {
+      await navigateTo(`/${username}/`);
+    } else if (!route.path.startsWith(`/${username}/`)) {
+      throw createError({
+        statusCode: 403,
+        message: "Vous n'avez pas accès à ce dossier",
+      });
+    }
+  } else {
+    throw createError({
+      statusCode: 403,
+      message: "Vous n'avez pas accès à ce service",
+      fatal: true,
+    });
+  }
+}
 
 const fetchAllTree = ref(false);
 
@@ -73,7 +128,7 @@ const {
 } = await useFetch(
   () =>
     fetchAllTree.value
-      ? "/api/files/tree"
+      ? `/api/files/tree`
       : `/api/files/folded/${pathWithoutRootSlash()}`,
   {}
 );

@@ -1,7 +1,10 @@
-export default eventHandler(async (event) => {
-    await requireUserSession(event)
+import { writePath } from "~/utils/abilities"
 
-    const { public: publicUpload, path } = getQuery(event)
+export default eventHandler(async (event) => {
+    const { public: publicUpload, path: pathQuery } = getQuery(event)
+    const path = pathQuery?.toString() ?? ""
+
+    await authorize(event, writePath, path)
 
     return hubBlob().handleUpload(event, {
         formKey: 'files', // read file or files form the `formKey` field of request body (body should be a `FormData` object)
@@ -12,7 +15,7 @@ export default eventHandler(async (event) => {
             customMetadata: {
                 public: publicUpload?.toString() ?? "false"
             },
-            prefix: path?.toString(),
+            prefix: path,
         },
     })
 })
