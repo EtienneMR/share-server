@@ -26,7 +26,14 @@ const props = defineProps<{
 
 const { status } = toRefs(props);
 
+const { clear } = useUserSession();
 const { state: finished, use: setFinished } = useTimed(3000);
+
+async function logout() {
+  await clear();
+  await navigateTo("/", { external: true });
+}
+
 const selectedLoad = computed({
   get: () =>
     FETCH_OPTIONS.find((option) => option.fetchAllTree == fetchAllTree.value),
@@ -68,7 +75,9 @@ watch(status, (st) => {
     /></Can>
     <Can :bouncer-ability="readGlobal2" :args="[]">
       <UIcon name="mdi-pencil-plus" />
-      <div class="flex-1" />
+    </Can>
+    <div class="flex-1" />
+    <Can :bouncer-ability="readGlobal2" :args="[]">
       <span>Charger</span>
       <USelectMenu v-model="selectedLoad" :options="FETCH_OPTIONS">
         <template #leading>
@@ -80,5 +89,6 @@ watch(status, (st) => {
         </template>
       </USelectMenu>
     </Can>
+    <UButton icon="mdi-logout" color="gray" variant="ghost" @click="logout" />
   </h1>
 </template>

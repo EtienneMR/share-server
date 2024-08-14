@@ -5,7 +5,6 @@ export default oauthAuth0EventHandler({
         audience: "share-server",
     },
     async onSuccess(event, { user, tokens }) {
-        console.log(user, tokens)
         await setUserSession(event, {
             user: {
                 ...user,
