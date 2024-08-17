@@ -142,9 +142,6 @@ const currentNode = computed(() =>
 
 watch(error, updateErrorToast);
 onNuxtReady(updateErrorToast);
-onNuxtReady(() => {
-  //fetchAllTree.value = true;
-});
 </script>
 
 <template>
@@ -159,7 +156,6 @@ onNuxtReady(() => {
         v-model:fetch-all-tree="fetchAllTree"
         :tree-root="treeRoot"
         :current-node="currentNode"
-        :blobs="(blobs as never)"
         @refresh="refresh"
       />
     </div>

@@ -13,12 +13,12 @@
   "dependencies": {
     "@nuxt/eslint": "^0.5.0",
     "@nuxt/ui": "^2.18.4",
-    "@nuxthub/core": "^0.7.1",
+    "@nuxthub/core": "^0.7.3",
     "nuxt": "^3.12.4",
-    "nuxt-auth-utils": "^0.3.3",
+    "nuxt-auth-utils": "^0.3.4",
     "nuxt-authorization": "^0.0.4",
     "ufo": "^1.5.4",
-    "vue": "^3.4.37",
+    "vue": "^3.4.38",
     "vue-router": "^4.4.3"
   },
   "devDependencies": {
@@ -31,6 +31,6 @@
     "tailwindcss": "^3.4.10",
     "typescript": "^5.5.4",
     "vue-tsc": "^2.0.29",
-    "wrangler": "^3.71.0"
+    "wrangler": "^3.72.0"
   }
 }

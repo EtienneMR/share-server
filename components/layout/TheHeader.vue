@@ -40,8 +40,6 @@ const selectedLoad = computed({
   set: (option) => (fetchAllTree.value = option?.fetchAllTree),
 });
 
-const readOwn2 = readOwn;
-const readGlobal2 = readGlobal;
 watch(status, (st) => {
   if (st == "success") {
     setFinished();
@@ -70,14 +68,14 @@ watch(status, (st) => {
       :loading="status == 'pending'"
       @click="emit('refresh')"
     />
-    <Can :bouncer-ability="readOwn2" :args="[]">
+    <Can :bouncer-ability="readOwn" :args="[]">
       <UIcon name="mdi-pencil-lock"
     /></Can>
-    <Can :bouncer-ability="readGlobal2" :args="[]">
+    <Can :bouncer-ability="readGlobal" :args="[]">
       <UIcon name="mdi-pencil-plus" />
     </Can>
     <div class="flex-1" />
-    <Can :bouncer-ability="readGlobal2" :args="[]">
+    <Can :bouncer-ability="readGlobal" :args="[]">
       <span>Charger</span>
       <USelectMenu v-model="selectedLoad" :options="FETCH_OPTIONS">
         <template #leading>

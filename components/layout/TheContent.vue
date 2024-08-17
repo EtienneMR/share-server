@@ -17,7 +17,6 @@ const emit = defineEmits<{
 const props = defineProps<{
   treeRoot: TreeNode | null;
   currentNode: TreeNode | null;
-  blobs: PartialBlobObject[] | undefined;
 }>();
 
 const formatBytes2 = formatBytes;
@@ -48,7 +47,7 @@ onUnmounted(() => removeEventListener("keyup", handleKeyEvent));
     <PathCard
       key="path-card"
       v-model:fetch-all-tree="fetchAllTree"
-      :blobs="blobs"
+      :tree-root="treeRoot"
     />
     <div
       v-if="fetchAllTree && currentNode && treeRoot"

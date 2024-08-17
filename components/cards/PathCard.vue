@@ -7,7 +7,7 @@ const router = useRouter();
 const fetchAllTree = defineModel<boolean>("fetchAllTree");
 
 defineProps<{
-  blobs: PartialBlobObject[] | undefined;
+  treeRoot: TreeNode | null;
 }>();
 
 const folderTarget = ref("");
@@ -61,6 +61,8 @@ const links = computed(() => {
       />
     </form>
     <span class="flex-1" />
-    <TheSearch v-model:fetch-all-tree="fetchAllTree" :blobs="blobs" />
+    <Can :bouncer-ability="readGlobal" :args="[]">
+      <TheSearch v-model:fetch-all-tree="fetchAllTree" :tree-root="treeRoot" />
+    </Can>
   </BaseCard>
 </template>

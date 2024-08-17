@@ -10,22 +10,25 @@ const router = useRouter();
 const fetchAllTree = defineModel<boolean>("fetchAllTree");
 
 const props = defineProps<{
-  blobs: PartialBlobObject[] | undefined;
+  treeRoot: TreeNode | null;
 }>();
 
 const isOpen = ref(false);
 
-const commands = computed(() =>
-  props.blobs?.map((blob) => {
-    const prefix = blob.pathname.split("/");
-    const name = prefix.pop();
+function discover(node: TreeNode, flattened: SearchElement[]) {
+  const prefix = node.pathname.split("/");
+  const name = node.blob ? prefix.pop() : "";
+  flattened.push({
+    id: node.pathname,
+    prefix: prefix.join("/"),
+    label: name,
+  });
+  node.children?.forEach((n) => discover(n, flattened));
+  return flattened;
+}
 
-    return {
-      id: blob.pathname,
-      prefix: prefix.join("/"),
-      label: name,
-    } as SearchElement;
-  })
+const commands = computed(() =>
+  props.treeRoot ? discover(props.treeRoot, []) : undefined
 );
 
 function goTo(elem: SearchElement) {

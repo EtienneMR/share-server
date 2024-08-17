@@ -45,12 +45,20 @@ const isPrivate = computed(() =>
 async function deleteBlobs() {
   deleting.value = true;
   try {
-    const path = node.value.pathname.substring(1);
+    const singleBlob =
+      !hasAnyUnloadedDescendant.value && descendantBlobs.value.length == 1
+        ? descendantBlobs.value[0]
+        : undefined;
+
+    const path = singleBlob
+      ? singleBlob.pathname
+      : node.value.pathname.substring(1);
 
     await $fetch("/api/files", {
       method: "DELETE",
       query: {
         path,
+        file: singleBlob != null,
       },
     });
   } catch (err) {
@@ -165,14 +173,15 @@ function promptDeleteNode() {
         disabled
       />
     </template>
-    <UButton
-      v-else-if="!fetchAllTree"
-      icon="mdi-dots-vertical"
-      size="2xs"
-      color="gray"
-      variant="ghost"
-      @click="fetchAllTree = true"
-    />
+    <Can v-else-if="!fetchAllTree" :bouncer-ability="readGlobal" :args="[]">
+      <UButton
+        icon="mdi-dots-vertical"
+        size="2xs"
+        color="gray"
+        variant="ghost"
+        @click="fetchAllTree = true"
+      />
+    </Can>
     <UButton
       icon="mdi-trash-can-outline"
       size="2xs"
