@@ -5,7 +5,7 @@ type SearchElement = {
   label: string | undefined;
 };
 
-const router = useRouter();
+const path = useEncodedPath();
 
 const fetchAllTree = defineModel<boolean>("fetchAllTree");
 
@@ -32,7 +32,7 @@ const commands = computed(() =>
 );
 
 function goTo(elem: SearchElement) {
-  router.push("/" + elem.prefix);
+  path.value = "/" + elem.prefix;
   isOpen.value = false;
 }
 

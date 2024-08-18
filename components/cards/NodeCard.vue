@@ -3,6 +3,7 @@ import type { PartialBlobObject } from "~/utils/nodes.js";
 import BaseCard from "~~/components/cards/BaseCard.vue";
 
 const toast = useToast();
+const path = useEncodedPath();
 
 const formatBytes2 = formatBytes;
 
@@ -130,8 +131,10 @@ function promptDeleteNode() {
       v-if="node.children"
       :to="node.pathname"
       class="flex-1 w-0 truncate"
-      >{{ node.name }}</NuxtLink
+      @click.prevent="path = node.pathname"
     >
+      {{ node.name }}
+    </NuxtLink>
     <span v-else class="flex-1 w-0 truncate">{{ node.name }}</span>
     <template v-if="!hasAnyUnloadedDescendant">
       <span class="mx-1">{{ formatBytes2(node.totalSize) }}</span>

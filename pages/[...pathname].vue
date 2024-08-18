@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import type { RouteLocationNormalized } from "vue-router";
 import TheContent from "~/components/layout/TheContent.vue";
+import { useEncodedPath } from "~/composables/useEncodedPath.js";
 import TheHeader from "~~/components/layout/TheHeader.vue";
 
-const route = useRoute();
+const path = useEncodedPath();
 const toast = useToast();
 
 useSeoMeta({
-  title: () => `Share server — ${route.path}`,
+  title: () => `Share server — ${path.value}`,
 });
 
 useHead({
@@ -41,7 +42,7 @@ async function checkRoute(to: RouteLocationNormalized) {
     const { user } = useUserSession();
     const username = user.value?.name;
     if (await allows(readOwn)) {
-      if (route.path == "/" || route.path == `/${username}`) {
+      if (path.value == "/" || path.value == `/${username}`) {
         return `/${username}/`;
       } else if (!to.path.startsWith(`/${username}/`)) {
         toast.add({
@@ -69,13 +70,13 @@ async function checkRoute(to: RouteLocationNormalized) {
 }
 
 onBeforeRouteUpdate(checkRoute);
-if (await denies(readPath, route.path)) {
+if (await denies(readPath, path.value)) {
   const { user } = useUserSession();
   const username = user.value?.name;
   if (await allows(readOwn)) {
-    if (route.path == "/" || route.path == `/${username}`) {
+    if (path.value == "/" || path.value == `/${username}`) {
       await navigateTo(`/${username}/`);
-    } else if (!route.path.startsWith(`/${username}/`)) {
+    } else if (!path.value.startsWith(`/${username}/`)) {
       throw createError({
         statusCode: 403,
         message: "Vous n'avez pas accès à ce dossier",
@@ -93,8 +94,7 @@ if (await denies(readPath, route.path)) {
 const fetchAllTree = ref(false);
 
 function pathWithoutRootSlash() {
-  const { path } = route;
-  return encodeURI(path == "/" ? "%root%" : path.substring(1));
+  return encodeURI(path.value == "/" ? "%root%" : path.value.substring(1));
 }
 
 function updateErrorToast() {
@@ -137,7 +137,7 @@ const treeRoot = computed(() =>
   blobs.value ? buildTree(blobs.value as never) : null
 );
 const currentNode = computed(() =>
-  treeRoot.value ? getNodeFromPath(treeRoot.value, route.path) : null
+  treeRoot.value ? getNodeFromPath(treeRoot.value, path.value) : null
 );
 
 watch(error, updateErrorToast);

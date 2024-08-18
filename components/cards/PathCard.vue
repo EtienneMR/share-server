@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import BaseCard from "~/components/cards/BaseCard.vue";
+import { useEncodedPath } from "~/composables/useEncodedPath.js";
 
-const route = useRoute();
-const router = useRouter();
+const path = useEncodedPath();
 
 const fetchAllTree = defineModel<boolean>("fetchAllTree");
 
@@ -14,21 +14,21 @@ const folderTarget = ref("");
 
 function go() {
   if (folderTarget.value) {
-    const target = route.path
+    const target = path.value
       .split("/")
       .concat(folderTarget.value.split("/"))
       .filter((p) => p)
       .join("/");
-    router.push("/" + target);
+    path.value = "/" + target;
     folderTarget.value = "";
   }
 }
 
 const links = computed(() => {
-  const path = route.path.split("/").filter((p) => p);
+  const names = path.value.split("/").filter((p) => p);
   let previous = "";
 
-  const l = path.map((name) => {
+  const l = names.map((name) => {
     previous += "/" + name;
     return {
       label: name,
