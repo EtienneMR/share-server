@@ -1,36 +1,29 @@
 {
-  "name": "nuxt-app",
+  "name": "share-server",
   "private": true,
   "type": "module",
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
-    "preview": "nuxt preview",
+    "preview": "npx nuxthub preview",
+    "deploy": "npx nuxthub deploy",
     "postinstall": "nuxt prepare",
     "lint": "eslint ."
   },
   "dependencies": {
-    "@nuxt/eslint": "^0.5.0",
-    "@nuxt/ui": "^2.18.4",
-    "@nuxthub/core": "^0.7.3",
-    "nuxt": "^3.12.4",
-    "nuxt-auth-utils": "^0.3.4",
-    "nuxt-authorization": "^0.0.4",
-    "ufo": "^1.5.4",
-    "vue": "^3.4.38",
-    "vue-router": "^4.4.3"
+    "@nuxt/eslint": "^0.6.1",
+    "@nuxt/ui": "^2.19.2",
+    "@nuxthub/core": "^0.8.6",
+    "nuxt": "^3.14.159",
+    "vue": "^3.5.12",
+    "vue-router": "^4.4.5"
   },
   "devDependencies": {
-    "@iconify-json/heroicons": "^1.1.24",
-    "@iconify-json/mdi": "^1.1.68",
-    "@iconify-json/ph": "^1.1.14",
-    "@nuxt/eslint-config": "^0.5.0",
-    "@nuxtjs/tailwindcss": "^6.12.1",
-    "eslint": "^9.9.0",
-    "tailwindcss": "^3.4.10",
-    "typescript": "^5.5.4",
-    "vue-tsc": "^2.0.29",
-    "wrangler": "^3.72.0"
+    "@nuxt/eslint-config": "^0.6.1",
+    "eslint": "^9.14.0",
+    "typescript": "^5.6.3",
+    "vue-tsc": "^2.1.10",
+    "wrangler": "^3.84.1"
   }
 }
